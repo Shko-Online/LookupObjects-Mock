@@ -1,87 +1,101 @@
-import type { Meta, StoryObj } from '@storybook/html';
-import type { IInputs, IOutputs } from '../__sample-components__/WebAPIControl/generated/ManifestTypes';
+import type { Meta, StoryObj } from "@storybook/html";
+import type {
+  IInputs,
+  IOutputs,
+} from "../__sample-components__/WebAPIControl/generated/ManifestTypes";
 
-import { useArgs, useEffect } from '@storybook/preview-api';
-import { WebAPIControl as Component } from '../__sample-components__/WebAPIControl';
-import { AttributeType, ComponentFrameworkMockGenerator, ShkoOnline, StringPropertyMock } from '@shko.online/componentframework-mock';
-import '../__sample-components__/WebAPIControl/css/WebAPIControl.css';
+import { useArgs, useEffect } from "@storybook/preview-api";
+import { WebAPIControl as Component } from "../__sample-components__/WebAPIControl";
+import {
+  AttributeType,
+  ComponentFrameworkMockGenerator,
+  ShkoOnline,
+  StringPropertyMock,
+} from "@shko.online/componentframework-mock";
+import "../__sample-components__/WebAPIControl/css/WebAPIControl.css";
+import mockLookupObjects from "../src";
 
 export default {
-    title: "Shko Online's LookupObjects-Mock/WebAPI Control",
+  title: "Shko Online's LookupObjects-Mock/WebAPI Control",
 } as Meta<StoryArgs>;
 
 interface StoryArgs {
-    isDisabled: boolean;
-    isVisible: boolean;
+  isDisabled: boolean;
+  isVisible: boolean;
 }
 
 const renderGenerator = () => {
-    let container: HTMLDivElement;
-    let mockGenerator: ComponentFrameworkMockGenerator<IInputs, IOutputs>;
+  let container: HTMLDivElement;
+  let mockGenerator: ComponentFrameworkMockGenerator<IInputs, IOutputs>;
 
-    return function () {
-        const [args] = useArgs<StoryArgs>();
-        useEffect(
-            () => () => {
-                container = null;
-                mockGenerator.control.destroy();
-            },
-            [],
-        );
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'SampleNamespace.WebAPIControl';
-            mockGenerator = new ComponentFrameworkMockGenerator(
-                Component,
-                {
-                    stringProperty: StringPropertyMock,
-                },
-                container,
-            );
+  return function () {
+    const [args] = useArgs<StoryArgs>();
+    useEffect(
+      () => () => {
+        container = null;
+        mockGenerator.control.destroy();
+      },
+      []
+    );
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "SampleNamespace.WebAPIControl";
+      mockGenerator = new ComponentFrameworkMockGenerator(
+        Component,
+        {
+          stringProperty: StringPropertyMock,
+        },
+        container
+      );
 
-            mockGenerator.metadata.initMetadata([
-                { LogicalName: 'account', EntitySetName: 'accounts', PrimaryIdAttribute: 'accountid', PrimaryNameAttribute: 'name', Attributes: [
-                    {
-                        AttributeType: AttributeType.Uniqueidentifier,
-                        LogicalName: 'accountid',
-                        SchemaName: 'AccountId'
-                    } as ShkoOnline.AttributeMetadata,
-                    {
-                        AttributeType: AttributeType.String,
-                        LogicalName: 'name',
-                        SchemaName: 'Name'
-                    } as ShkoOnline.StringAttributeMetadata,
-                    {
-                        AttributeType: AttributeType.Money,
-                        LogicalName: 'revenue',
-                        SchemaName: 'revenue'
-                    } as ShkoOnline.AttributeMetadata
-                ] },
-            ]);
+      mockGenerator.metadata.initMetadata([
+        {
+          LogicalName: "account",
+          EntitySetName: "accounts",
+          PrimaryIdAttribute: "accountid",
+          PrimaryNameAttribute: "name",
+          Attributes: [
+            {
+              AttributeType: AttributeType.Uniqueidentifier,
+              LogicalName: "accountid",
+              SchemaName: "AccountId",
+            } as ShkoOnline.AttributeMetadata,
+            {
+              AttributeType: AttributeType.String,
+              LogicalName: "name",
+              SchemaName: "Name",
+            } as ShkoOnline.StringAttributeMetadata,
+            {
+              AttributeType: AttributeType.Money,
+              LogicalName: "revenue",
+              SchemaName: "revenue",
+            } as ShkoOnline.AttributeMetadata,
+          ],
+        },
+      ]);
 
-            mockGenerator.context.mode.isControlDisabled = args.isDisabled;
-            mockGenerator.context.mode.isVisible = args.isVisible;
-            mockGenerator.context._SetCanvasItems({
-                stringProperty: '',
-            });
+      mockGenerator.context.mode.isControlDisabled = args.isDisabled;
+      mockGenerator.context.mode.isVisible = args.isVisible;
+      mockGenerator.context._SetCanvasItems({
+        stringProperty: "",
+      });
 
-            mockGenerator.ExecuteInit();
-        }
+      mockLookupObjects(mockGenerator, container);
+      mockGenerator.ExecuteInit();
+    }
 
-        if (mockGenerator) {
-            mockGenerator.context.mode.isVisible = args.isVisible;
-            mockGenerator.context.mode.isControlDisabled = args.isDisabled;
+    if (mockGenerator) {
+      mockGenerator.context.mode.isVisible = args.isVisible;
+      mockGenerator.context.mode.isControlDisabled = args.isDisabled;
 
-            mockGenerator.ExecuteUpdateView();
-        }
+      mockGenerator.ExecuteUpdateView();
+    }
 
-        return container;
-    };
+    return container;
+  };
 };
 
 export const WebAPIControl = {
-    render: renderGenerator(),
-    args: {
-
-    },
+  render: renderGenerator(),
+  args: {},
 } as StoryObj<StoryArgs>;
