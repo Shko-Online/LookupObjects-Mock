@@ -1,0 +1,4 @@
+.storybook/
+__sample-components__
+stories/
+.github

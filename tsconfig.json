@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "esModuleInterop": true,
+        "target": "es5",
+        "lib": [
+            "es5",
+            "es6",
+            "dom"
+        ],
+        "module": "ES6",
+        "moduleResolution": "node",
+        "noEmit": false,
+        "outDir": "lib",
+        "resolveJsonModule": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,       
+        "baseUrl": ".",
+    },
+    "exclude": [
+        "node_modules",
+        "wwwroot",
+        "lib"
+    ],
+    "include": [
+        "src", "stories",
+    ]
+}
