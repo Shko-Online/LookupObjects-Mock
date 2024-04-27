@@ -30,7 +30,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "tailwind": "npx tailwindcss -o ./src/LookupCss.css"
+    "tailwind": "tailwindcss -o ./src/LookupCss.css"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
   },
   "homepage": "https://github.com/Shko-Online/LookupObjects-Mock#readme",
   "dependencies": {
-    "@shko.online/componentframework-mock": "^0.6.0",
+    "@shko.online/componentframework-mock": "^0.6.1",
     "react": "16.8.6",
     "react-dom": "16.8.6"
   },
