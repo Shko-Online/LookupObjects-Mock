@@ -32,6 +32,7 @@ const renderGenerator = () => {
     const [args] = useArgs<StoryArgs>();
     useEffect(
       () => () => {
+        container.innerHTML = null;
         container = null;
         mockGenerator.control.destroy();
       },
@@ -80,7 +81,7 @@ const renderGenerator = () => {
         stringProperty: "",
       });
 
-      mockLookupObjects(mockGenerator, container);
+      mockLookupObjects(mockGenerator);
       mockGenerator.ExecuteInit();
     }
 

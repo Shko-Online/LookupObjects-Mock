@@ -34,7 +34,8 @@
         }
     },
     "ignorePatterns": [
-        "**/generated/*.ts"
+        "**/generated/*.ts",
+        "lib/*"
     ],
     "rules": {
         "eqeqeq": [

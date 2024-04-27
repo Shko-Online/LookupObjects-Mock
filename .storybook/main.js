@@ -8,7 +8,6 @@ const config = {
     "@storybook/addon-webpack5-compiler-swc",
     "@storybook/addon-links",
     "@storybook/addon-essentials",
-    "@chromatic-com/storybook",
     "@storybook/addon-interactions",
   ],
   framework: {

@@ -1,39 +1,32 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import './LookupCss.css';
-function LookupComponent() {
 
-
+function LookupComponent({ unmount }: { unmount: () => void }) {
+    const onCloseClick = useCallback(
+        (e: React.MouseEvent) => {
+            console.log('unmount?');
+            unmount();
+        },
+        [unmount],
+    );
     return (
-        <div className='fixed top-0 bottom-0 right-0 left-0 z-50 w-full bg-opacity-30 bg-black flex justify-end'        >
-            <div className='flex flex-col h-full box-border bg-white  border-solid border-2 border-transparent overflow-auto flex-nowrap w-96 content-start outline-none text-neutral-800 font-sans font-normal antialiased visible'>
-                <section className="flex flex-col flex-1 "                >
-                    <div
-                        id="lookupDialogHeaderContainer"
-                        className='flex flex-col mb-1 mx-5 mt-5'
-                    >
-                        <div role="presentation"
-                            className='flex flex-row justify-between'
-                        >
-                            <h1
-                                id="lookupDialogTitle"
-                                tabIndex={-1}
-                                className='text-xl font-semibold text-left'
-
-                            >
+        <div className="so.fixed so.top-0 so.bottom-0 so.right-0 so.left-0 so.z-50 so.w-full so.bg-opacity-30 so.bg-black so.flex so.justify-end">
+            <div className="so.flex so.flex-col so.h-full so.box-border so.bg-white so.border-solid so.border-2 so.border-transparent so.overflow-auto so.flex-nowrap so.w-96 so.content-start so.outline-none so.text-neutral-800 so.font-sans so.font-normal so.antialiased so.visible">
+                <section className="so.flex so.flex-col so.flex-1">
+                    <div className="so.flex so.flex-col so.mb-1 so.mx-5 so.mt-5">
+                        <div role="presentation" className="so.flex so.flex-row so.justify-between">
+                            <h1 tabIndex={-1} className="so.text-xl so.font-semibold so.text-left">
                                 Lookup Records
                             </h1>
                             <button
+                                onClick={onCloseClick}
+                                className="so.bg-transparent so.text-neutral-700 so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-8"
                                 type="button"
                                 title="Close"
-                                className='bg-transparent text-neutral-700 border-transparent items-center align-middle justify-center box-border p-1 w-8 '
-
                             >
-                                <span
-                                    className='items-center inline-flex justify-center text-xl h-5 w-5'
-                                >
+                                <span className="so.items-center so.inline-flex so.justify-center so.text-xl so.h-5 so.w-5">
                                     <svg
                                         fill="currentColor"
-                                        className="___12fm75w f1w7gpdv fez10in fg4l7m0"
                                         aria-hidden="true"
                                         // width="24"
                                         // height="24"
@@ -49,22 +42,17 @@ function LookupComponent() {
                             </button>
                         </div>
 
-                        <h2
-                            id="lookupDialogSubTitle"
-                            tabIndex={-1}
-                            className='text-base font-semibold font-sans'
-
-                        >
+                        <h2 tabIndex={-1} className="so.text-base so.font-semibold so.font-sans">
                             Select record
                         </h2>
-
                     </div>
-                    <div className="flex  overflow-visible mb-6 mx-2 mt-4 justify-between h-full flex-col" id="lookupDialogContainer" role="presentation"                    >
+                    <div
+                        className="so.flex so.overflow-visible so.mb-6 so.mx-2 so.mt-4 so.justify-between so.h-full so.flex-col"
+                        role="presentation"
+                    >
                         <div
-                            id="lookupDialogLookup"
+                            className="so.pa-az so.pa-oc pa-ky pa-le pa-hd pa-he pa-od pa-fa pa-z webkitScroll flexbox"
                             role="presentation"
-                            className="pa-az pa-oc pa-ky pa-le pa-hd pa-he pa-od pa-fa pa-z webkitScroll flexbox"
-                            data-lp-id="MscrmControls.FieldControls.SimpleLookupControl|MscrmControls.FieldControls.SimpleLookupControl|null"
                         >
                             <div
                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0"
@@ -94,7 +82,7 @@ function LookupComponent() {
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_live_region"
                                                 role="status"
                                                 aria-atomic="true"
-                                            //style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
+                                                //style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
                                             ></div>
                                             <div
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearch"
@@ -113,7 +101,6 @@ function LookupComponent() {
                                                     aria-autocomplete="list"
                                                     type="text"
                                                     className="pa-az pa-cx pa-pd pa-fc pa-da pa-ih pa-pe pa-pf pa-pg pa-ph "
-                                                    value=""
                                                     aria-describedby="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_Type_To_Search_Text"
                                                 />
 
@@ -224,7 +211,7 @@ function LookupComponent() {
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_status"
                                                 role="status"
                                                 aria-atomic="true"
-                                            // style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
+                                                // style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
                                             ></div>
                                         </div>
                                     </div>
@@ -232,46 +219,30 @@ function LookupComponent() {
                             </div>
                         </div>
                     </div>
-                    <div
-                        id="lookupDialogFooterContainer"
-                        className='flex flex-grow-0 flex-shrink-0 basis-0 pr-2 gap-x-2 mt-2 mb-5 self-end justify-end align-middle items-center'
-
-                    >
-                        <div
-                            id="lookupDialogFooterAddButtonContainer"
-
-                            role="presentation"
-                            className="flex w-full outline-none"
-                        >
+                    <div className="so.flex so.flex-grow-0 so.flex-shrink-0 so.basis-0 so.pr-2 so.gap-x-2 so.mt-2 so.mb-5 so.self-end so.justify-end so.align-middle so.items-center">
+                        <div className="so.flex so.w-full so.outline-none" role="presentation">
                             <button
+                                className="so.text-sm so.text-white so.border-transparent so.bg-sky-700 so.rounded so.px-3 so.py-1 so.items-center so.box-border so.inline-flex so.justify-center so.no-underline so.align-middle so.overflow-hidden so.min-w-24 so.duration-100 so.transition-[background,border,color] so.ease-in"
                                 type="button"
                                 title="Add"
-                                data-id="ADD_BUTTON_ID"
-                                id="lookupDialogSaveBtn"
-                                className='text-sm text-white border-transparent bg-sky-700 rounded px-3 py-1 items-center box-border inline-flex justify-center no-underline align-middle overflow-hidden min-w-24  duration-100 transition-[background,border,color] ease-in'
                             >
                                 Add
                             </button>
                         </div>
-                        <div
-                            id="lookupDialogFooterCancelButtonContainer"
-                            data-id="lookupDialogFooterCancelButtonContainer"
-                            role="presentation"
-                            className="flex w-full outline-none"
-                        >
+                        <div className="so.flex so.w-full so.outline-none" role="presentation">
                             <button
-                                type="button"
+                                className="so.text-sm so.text-neutral-800 so.border-[1px] so.border-neutral-500 so.bg-white so.rounded so.px-3 so.py-1 so.items-center so.box-border so.inline-flex so.justify-center so.no-underline so.align-middle so.overflow-hidden so.min-w-24 so.duration-100 so.transition-[background,border,color] so.ease-in"
+                                onClick={onCloseClick}
                                 title="Cancel"
-                                id="lookupDialogCancelBtnFooter"
-                                className='text-sm text-neutral-800 border-[1px] border-neutral-500 bg-white rounded px-3 py-1 items-center box-border inline-flex justify-center no-underline align-middle overflow-hidden min-w-24  duration-100 transition-[background,border,color] ease-in'
+                                type="button"
                             >
                                 Cancel
                             </button>
                         </div>
                     </div>
                 </section>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }
 
