@@ -1,14 +1,57 @@
-import React, { useCallback } from 'react';
+import React, { KeyboardEvent, useCallback, useMemo, useState } from 'react';
 import './LookupCss.css';
+import { MetadataDB } from '@shko.online/componentframework-mock';
 
-function LookupComponent({ unmount }: { unmount: () => void }) {
+interface ILookupComponentProps {
+    unmount: () => void;
+    resolve: (value: ComponentFramework.LookupValue[] | PromiseLike<ComponentFramework.LookupValue[]>) => void;
+    lookupOptions: ComponentFramework.UtilityApi.LookupOptions;
+    db: MetadataDB;
+}
+
+function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupComponentProps) {
+    const [results, setResults] = useState<ComponentFramework.LookupValue[]>([]);
     const onCloseClick = useCallback(
         (e: React.MouseEvent) => {
             console.log('unmount?');
             unmount();
+            resolve([]);
         },
         [unmount],
     );
+
+    const onKeyPress = useCallback(
+        (e: KeyboardEvent) => {
+            if (e.charCode === 13) {
+                const search = (e.target as HTMLInputElement).value;
+                var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
+                const select = `SELECT 
+                ${metadata.PrimaryIdAttribute}, 
+                ${metadata.PrimaryNameAttribute}
+            FROM ${metadata.LogicalName}
+            ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
+                setResults(
+                    (db.db.exec(select) as any[]).map(
+                        (v) =>
+                            ({
+                                entityType: lookupOptions.entityTypes[0],
+                                id: v[metadata.PrimaryIdAttribute],
+                                name: v[metadata.PrimaryNameAttribute],
+                            }) as ComponentFramework.LookupValue,
+                    ),
+                );
+            }
+        },
+        [db, lookupOptions.entityTypes],
+    );
+
+    const lookForRecords = useMemo(() => {
+        if (lookupOptions.entityTypes.length > 1) {
+            return 'Look for records';
+        }
+        var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
+        return 'Look for ' + (metadata.DisplayCollectionName || metadata.DisplayName || metadata.LogicalName);
+    }, [lookupOptions.entityTypes]);
     return (
         <div className="so.fixed so.top-0 so.bottom-0 so.right-0 so.left-0 so.z-50 so.w-full so.bg-opacity-30 so.bg-black so.flex so.justify-end">
             <div className="so.flex so.flex-col so.h-full so.box-border so.bg-white so.border-solid so.border-2 so.border-transparent so.overflow-auto so.flex-nowrap so.w-96 so.content-start so.outline-none so.text-neutral-800 so.font-sans so.font-normal so.antialiased so.visible">
@@ -50,43 +93,30 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                         className="so.flex so.overflow-visible so.mb-6 so.mx-2 so.mt-4 so.justify-between so.h-full so.flex-col"
                         role="presentation"
                     >
-                        <div
-                            className="so.pa-oc pa-ky pa-le pa-hd pa-he pa-od pa-fa pa-z webkitScroll flexbox"
-                            role="presentation"
-                        >
-                            <div
-                                className="so.max-w-full so.flex-1 so.flex"
-                                role="presentation"
-                            >
-                                <div
-                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0"
-                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup"
-                                    role="presentation"
-                                    className="pa-b pa-az pa-cs flexbox"
-                                >
+                        <div className="so.flex so.w-full" role="presentation">
+                            <div className="so.max-w-full so.flex-1 so.flex" role="presentation">
+                                <div role="presentation" className="so.flex so.flex-col so.w-full">
                                     <div
                                         id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearchContainer"
                                         role="presentation"
                                         data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_InputSearchContainer"
-                                        className=" "
+                                        className="so.flex so.w-full"
                                     >
                                         <div
                                             id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_BasicContainer"
                                             data-id="MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup"
                                             role="presentation"
-                                            className="so.bg-gray-100 pa-of pa-b pa-y pa-az pa-w pa-og pa-iu pa-gs pa-z pa-oh pa-oi pa-oj pa-ok pa-ol pa-om pa-on pa-oo pa-op pa-oq pa-or pa-os pa-ot pa-ou pa-ov pa-ow pa-ox pa-oy pa-oz pa-pa pa-pb flexbox"
+                                            className="so.rounded so.w-full so.bg-gray-100 pa-of pa-b pa-y pa-az pa-w pa-og pa-iu pa-gs pa-z pa-oh pa-oi pa-oj pa-ok pa-ol pa-om pa-on pa-oo pa-op pa-oq pa-or pa-os pa-ot pa-ou pa-ov pa-ow pa-ox pa-oy pa-oz pa-pa pa-pb flexbox"
                                         >
                                             <div
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_live_region"
                                                 role="status"
                                                 aria-atomic="true"
-                                                //style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
                                             ></div>
                                             <div
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearch"
                                                 role="presentation"
-                                                data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_InputSearch"
-                                                className="pa-gs pa-pc flexbox"
+                                                className="so.flex so.w-full so.p-1 so.pl-2 so.border-b-2 so.border-b-transparent focus-within:so.border-b-blue-700"
                                             >
                                                 <input
                                                     id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_textInputBox_with_filter_new"
@@ -94,11 +124,12 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                                                     role="searchbox"
                                                     data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_textInputBox_with_filter_new"
                                                     title="Select to enter data"
-                                                    placeholder="Look for records"
+                                                    placeholder={lookForRecords}
                                                     autoComplete="off"
                                                     aria-autocomplete="list"
+                                                    onKeyPress={onKeyPress}
                                                     type="text"
-                                                    className="pa-az pa-cx pa-pd pa-fc pa-da pa-ih pa-pe pa-pf pa-pg pa-ph "
+                                                    className="so.flex-1 so.bg-transparent so.outline-none active:so.border-transparent pa-az pa-cx pa-pd pa-fc pa-da pa-ih pa-pe pa-pf pa-pg pa-ph "
                                                     aria-describedby="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_Type_To_Search_Text"
                                                 />
 
@@ -108,110 +139,44 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                                                     title="Search"
                                                     data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_search"
                                                     type="button"
-                                                    className="pa-q pa-ee pa-pi pa-cn pa-lh pa-pj pa-da pa-pk pa-pl pa-pm pa-pn pa-iu pa-gz pa-po pa-pp flexbox"
+                                                    className="so.justify-center so.align-middle so.p-1 pa-q pa-ee pa-pi pa-cn pa-lh pa-pj pa-da pa-pk pa-pl pa-pm pa-pn pa-iu pa-gz pa-po pa-pp flexbox"
                                                 >
-                                                    <span
-                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_microsoftIcon_searchButton"
-                                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_microsoftIcon_searchButton"
-                                                        className="symbolFont SearchButton-symbol  "
-                                                    ></span>
+                                                    <svg
+                                                        width="14px"
+                                                        height="14px"
+                                                        viewBox="0 -0.5 21 21"
+                                                        version="1.1"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                                            <g
+                                                                transform="translate(-179.000000, -280.000000)"
+                                                                fill="#000000"
+                                                            >
+                                                                <g transform="translate(56.000000, 160.000000)">
+                                                                    <path d="M128.93985,132.929 L130.42455,134.343 L124.4847,140 L123,138.586 L128.93985,132.929 Z M136.65,132 C133.75515,132 131.4,129.757 131.4,127 C131.4,124.243 133.75515,122 136.65,122 C139.54485,122 141.9,124.243 141.9,127 C141.9,129.757 139.54485,132 136.65,132 L136.65,132 Z M136.65,120 C132.5907,120 129.3,123.134 129.3,127 C129.3,130.866 132.5907,134 136.65,134 C140.7093,134 144,130.866 144,127 C144,123.134 140.7093,120 136.65,120 L136.65,120 Z" />
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </svg>
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-                                    <div
-                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_children"
-                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_children"
-                                        role="presentation"
-                                        className="pa-b pa-ii pa-il pa-pq pa-f webkitScroll flexbox"
-                                    >
-                                        <span
-                                            id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_Type_To_Search_Text"
-                                            data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_Type_To_Search_Text"
-                                            className="pa-fc pa-jl pa-pr pa-cz pa-ps "
-                                        >
-                                            Type to search or press Enter to browse
-                                        </span>
-                                        <div
-                                            id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_tabContainer_0"
-                                            role="region"
-                                            data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_tabContainer"
-                                            className="pa-b pa-ii pa-f pa-pt webkitScroll flexbox"
-                                        >
-                                            <ul
-                                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_buttonPanelList_0"
-                                                role="presentation"
-                                                data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_buttonPanelList"
-                                                className="pa-ie pa-pu pa-dp pa-y flexbox"
-                                            >
-                                                <button
-                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_addNewBtnContainer_0"
-                                                    aria-label="New Record"
-                                                    role="button"
-                                                    title="Go to entity tab to add new"
-                                                    tabIndex={-1}
-                                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_addNewBtnContainer"
-                                                    type="button"
-                                                    className="pa-q pa-da pa-iu pa-ee pa-fc pa-cn pa-pv pa-dg pa-e pa-pw pa-px pa-lt pa-pm pa-pn pa-py pa-pz pa-qa flexbox"
-                                                >
-                                                    <div
-                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_microsoftIcon_new_container_0"
-                                                        aria-hidden="true"
-                                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_microsoftIcon_new_container"
-                                                        className="pa-gv "
-                                                    >
-                                                        <span
-                                                            id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_microsoftIcon_new_0"
-                                                            data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_microsoftIcon_new"
-                                                            className="symbolFont New-symbol pa-pr pa-qb "
-                                                        ></span>
-                                                    </div>
-                                                    <span
-                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_addNewBtn_0"
-                                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_addNewBtn_0"
-                                                        className="pa-az pa-e pa-cl pa-qc pa-qd "
-                                                    >
-                                                        New Record
-                                                    </span>
-                                                </button>
-                                                <a
-                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_advancedLookupBtnContainer"
-                                                    aria-label="Advanced lookup"
-                                                    role="button"
-                                                    tabIndex={0}
-                                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_advancedLookupBtnContainer"
-                                                    href="#"
-                                                    className="pa-q pa-da pa-iu pa-ee pa-fc pa-cn pa-pv pa-dg pa-e pa-pw pa-px pa-in pa-lt pa-pm pa-pn pa-py pa-pz pa-qa "
-                                                >
-                                                    <div aria-hidden="true" className="pa-gv ">
-                                                        <span className="symbolFont SearchButton-symbol pa-pr pa-qb "></span>
-                                                    </div>
-                                                    <span
-                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_0_advlookup"
-                                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_advlookup"
-                                                        className="pa-az pa-e pa-cl pa-qc pa-qd "
-                                                    >
-                                                        Advanced lookup
-                                                    </span>
-                                                </a>
+                                    <div role="presentation" className="so.w-full so.flex so.flex-1">
+                                        {results.length === 0 && (
+                                            <span className="">Type to search or press Enter to browse</span>
+                                        )}
+                                        {results.length > 0 && (
+                                            <ul className="so.flex-1 so.flex-col so.scroll-auto">
+                                                {results.map((r) => (
+                                                    <li key={r.id} className="so.flex">
+                                                        <div className="">Icon</div>
+                                                        <div className="so.flex-1">{r.name}</div>
+                                                    </li>
+                                                ))}
                                             </ul>
-                                        </div>
-                                        <span
-                                            id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_0_instructionsToExpandListItem"
-                                            data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_0_instructionsToExpandListItem"
-                                            className="pa-al "
-                                        >
-                                            Press the left or right arrow keys to toggle additional details. On touch
-                                            devices, navigate to the button named "More details" inside this item.
-                                        </span>
-                                        <div role="presentation" className=" ">
-                                            <div
-                                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_status"
-                                                role="status"
-                                                aria-atomic="true"
-                                                // style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; border: 0px; overflow: hidden; white-space: nowrap;"
-                                            ></div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

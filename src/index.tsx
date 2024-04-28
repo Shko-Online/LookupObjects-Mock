@@ -17,16 +17,12 @@ const mockLookupObjects = <
         root.insertAdjacentElement('afterend', container);
     }
     mockGenerator.context.utils.lookupObjects.callsFake((lookupOptions) => {
-        return new Promise((resolve, reject) => {
-            const unmount = (cancelled?: boolean) => {
+        return new Promise((resolve) => {
+            const unmount = () => {
                 ReactDOM.unmountComponentAtNode(container);
-                if(cancelled) {
-                    reject();
-                }else{
-                    resolve([]);
-                }
             };
-            ReactDOM.render(<LookupComponent unmount={unmount} />, container);        
+
+            ReactDOM.render(<LookupComponent unmount={unmount} resolve={resolve} lookupOptions={lookupOptions} db={mockGenerator.metadata} />, container);        
         });
     });
 };
