@@ -20,11 +20,11 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                             </h1>
                             <button
                                 onClick={onCloseClick}
-                                className="so.bg-transparent so.text-neutral-700 so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-8"
+                                className="so.bg-transparent so.text-neutral-700 so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-7 so.h-7 hover:so.bg-neutral-100"
                                 type="button"
                                 title="Close"
                             >
-                                <span className="so.items-center so.inline-flex so.justify-center so.text-xl so.h-5 so.w-5">
+                                <span className="so.items-center so.inline-flex so.justify-center so.leading-5 so.text-xl so.h-5 so.w-5">
                                     <svg
                                         fill="currentColor"
                                         aria-hidden="true"
@@ -51,14 +51,12 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                         role="presentation"
                     >
                         <div
-                            className="so.pa-az so.pa-oc pa-ky pa-le pa-hd pa-he pa-od pa-fa pa-z webkitScroll flexbox"
+                            className="so.pa-oc pa-ky pa-le pa-hd pa-he pa-od pa-fa pa-z webkitScroll flexbox"
                             role="presentation"
                         >
                             <div
-                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0"
-                                data-id="MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup"
+                                className="so.max-w-full so.flex-1 so.flex"
                                 role="presentation"
-                                className="pa-d pa-oe flexbox"
                             >
                                 <div
                                     id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0"
@@ -76,7 +74,7 @@ function LookupComponent({ unmount }: { unmount: () => void }) {
                                             id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_BasicContainer"
                                             data-id="MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup"
                                             role="presentation"
-                                            className="pa-of pa-b pa-y pa-az pa-w pa-og pa-iu pa-gs pa-z pa-oh pa-oi pa-oj pa-ok pa-ol pa-om pa-on pa-oo pa-op pa-oq pa-or pa-os pa-ot pa-ou pa-ov pa-ow pa-ox pa-oy pa-oz pa-pa pa-pb flexbox"
+                                            className="so.bg-gray-100 pa-of pa-b pa-y pa-az pa-w pa-og pa-iu pa-gs pa-z pa-oh pa-oi pa-oj pa-ok pa-ol pa-om pa-on pa-oo pa-op pa-oq pa-or pa-os pa-ot pa-ou pa-ov pa-ow pa-ox pa-oy pa-oz pa-pa pa-pb flexbox"
                                         >
                                             <div
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_live_region"
