@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useCallback, useMemo, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useMemo, useRef, useState } from 'react';
 import './LookupCss.css';
 import { MetadataDB } from '@shko.online/componentframework-mock';
 
@@ -10,7 +10,10 @@ interface ILookupComponentProps {
 }
 
 function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupComponentProps) {
-    const [results, setResults] = useState<ComponentFramework.LookupValue[]>([]);
+    const [results, setResults] = useState<ComponentFramework.LookupValue[]>(null);
+    const [selected, setSelected] = useState<ComponentFramework.LookupValue>(null);
+
+    const inpuRef = useRef<HTMLInputElement>();
     const onCloseClick = useCallback(
         (e: React.MouseEvent) => {
             console.log('unmount?');
@@ -20,31 +23,62 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
         [unmount],
     );
 
+    const searchRecords = useCallback(
+        (search: string) => {
+            var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
+            const select = `SELECT 
+        ${metadata.PrimaryIdAttribute}, 
+        ${metadata.PrimaryNameAttribute}
+    FROM ${metadata.LogicalName}
+    ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
+
+            const result = (db.db.exec(select) as any[]).map(
+                (v) =>
+                    ({
+                        entityType: lookupOptions.entityTypes[0],
+                        id: v[metadata.PrimaryIdAttribute],
+                        name: v[metadata.PrimaryNameAttribute],
+                    }) as ComponentFramework.LookupValue,
+            );
+            console.log('Result', result);
+            setResults(result);
+        },
+        [db, lookupOptions.entityTypes],
+    );
+
     const onKeyPress = useCallback(
         (e: KeyboardEvent) => {
             if (e.charCode === 13) {
                 const search = (e.target as HTMLInputElement).value;
-                var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
-                const select = `SELECT 
-                ${metadata.PrimaryIdAttribute}, 
-                ${metadata.PrimaryNameAttribute}
-            FROM ${metadata.LogicalName}
-            ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
-                setResults(
-                    (db.db.exec(select) as any[]).map(
-                        (v) =>
-                            ({
-                                entityType: lookupOptions.entityTypes[0],
-                                id: v[metadata.PrimaryIdAttribute],
-                                name: v[metadata.PrimaryNameAttribute],
-                            }) as ComponentFramework.LookupValue,
-                    ),
-                );
+                searchRecords(search);
             }
         },
         [db, lookupOptions.entityTypes],
     );
 
+    const OnSearchClick = useCallback(() => {
+        const search = inpuRef.current.value;
+        searchRecords(search);
+    }, [searchRecords]);
+
+    const onSelect = useCallback((lookup: ComponentFramework.LookupValue) => {
+        setSelected(lookup);
+        setResults(null);
+    }, []);
+
+    const onUnSelect = useCallback(() => {
+        setSelected(null);
+        if (inpuRef?.current?.value) inpuRef.current.value = '';
+    }, []);
+    const OnDeleteRecord = useCallback(
+        (id: string) => {
+            var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
+            console.log(metadata);
+            db.RemoveRow(metadata.LogicalName, id);
+            onUnSelect();
+        },
+        [db, lookupOptions.entityTypes],
+    );
     const lookForRecords = useMemo(() => {
         if (lookupOptions.entityTypes.length > 1) {
             return 'Look for records';
@@ -52,9 +86,85 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
         var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
         return 'Look for ' + (metadata.DisplayCollectionName || metadata.DisplayName || metadata.LogicalName);
     }, [lookupOptions.entityTypes]);
+
+    const entityTypesFilter = useMemo(() => {
+        var metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
+        // return 'Look for ' + (metadata.DisplayCollectionName || metadata.DisplayName || metadata.LogicalName);
+        console.log(metadata);
+        return lookupOptions.entityTypes.length === 1 ? (
+            <div
+                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_3_singleentity_heading"
+                role="presentation"
+                className="so.m-1 so.rounded so.bg-zinc-50 flex so.justify-start so.items-center so.align-middle"
+            >
+                <div
+                    role="presentation"
+                    className=" so.h-8 so.flex so.items-center so.pl-2 so.text-sm so.text-center  so.text-neutral-800 so.cursor-pointer"
+                >
+                    {metadata.DisplayName || metadata.LogicalName}
+                </div>
+            </div>
+        ) :
+            (
+                <div
+                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_1_all_heading"
+                    role="presentation"
+                    className="so.m-1 so.rounded so.bg-zinc-50"
+                >
+                    <div role="presentation" className="so.flex so.flex-row so.items-center">
+                        <div
+                            id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-resultsfrom"
+                            data-id="MscrmControls.FieldControls.SimpleLookupControl-resultsfrom"
+                            role="presentation"
+                            className="so.pl-2 so.text-sm so.text-center  so.text-neutral-800 so.cursor-default"
+                        >
+                            Results from:{' '}
+                        </div>
+                        <ul
+                            aria-labelledby="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-resultsfrom"
+                            className="so.flex so.flex-wrap so.overflow-hidden"
+                        >
+                            <li className=" ">
+                                <button
+                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_2_entityBtn_0"
+                                    role="button"
+                                    type="button"
+                                    disabled
+                                    className="so.flex so.text-xs so.py-1 so.px-2 so.m-1 so.leading-4 so.border so.border-neutral-300  disabled:so.border-opacity-30 so.border-solid so.rounded so.bg-white disabled:so.bg-zinc-100 disabled:so.bg-opacity-30 so.text-neutral-800
+                                disabled:so.text-stone-950 disabled:so.text-opacity-50 so.cursor-pointer"
+                                >
+                                    <span>
+                                        Accounts
+                                    </span>
+                                </button>
+                            </li>
+                            <li className=" ">
+                                <button
+                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_1_entityBtn_0"
+                                    aria-label="Contacts"
+                                    role="button"
+                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_ContactsBtn"
+                                    type="button"
+                                    className="so.flex so.text-xs so.py-1 so.px-2 so.m-1 so.leading-4 so.border so.border-neutral-300 so.border-solid so.rounded so.bg-white so.text-neutral-800 so.cursor-pointer"
+                                >
+                                    <span
+                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_1_ContactsBtn_0"
+                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsDropdown_falseBoundLookup_ContactsBtn_0"
+                                        className=" "
+                                    >
+                                        Contacts
+                                    </span>
+                                </button>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            );
+    }, [lookupOptions.entityTypes]);
     return (
         <div className="so.fixed so.top-0 so.bottom-0 so.right-0 so.left-0 so.z-50 so.w-full so.bg-opacity-30 so.bg-black so.flex so.justify-end">
-            <div className="so.flex so.flex-col so.h-full so.box-border so.bg-white so.border-solid so.border-2 so.border-transparent so.overflow-auto so.flex-nowrap so.w-96 so.content-start so.outline-none so.text-neutral-800 so.font-sans so.font-normal so.antialiased so.visible">
+            <div className="so.flex so.flex-col so.h-full so.box-border so.bg-white so.border-solid so.border-2 so.border-transparent so.overflow-auto so.flex-nowrap so.w-[400px] so.content-start so.outline-none so.text-neutral-800 so.font-sans so.font-normal so.antialiased so.visible">
                 <section className="so.flex so.flex-col so.flex-1">
                     <div className="so.flex so.flex-col so.mb-1 so.mx-5 so.mt-5">
                         <div role="presentation" className="so.flex so.flex-row so.justify-between">
@@ -63,7 +173,7 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                             </h1>
                             <button
                                 onClick={onCloseClick}
-                                className="so.bg-transparent so.text-neutral-700 so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-7 so.h-7 hover:so.bg-neutral-100"
+                                className="so.bg-transparent so.text-neutral-700 so.rounded so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-7 so.h-7 hover:so.bg-neutral-100 hover:so.text-blue-700"
                                 type="button"
                                 title="Close"
                             >
@@ -71,15 +181,13 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                                     <svg
                                         fill="currentColor"
                                         aria-hidden="true"
-                                        // width="24"
-                                        // height="24"
                                         viewBox="0 0 24 24"
                                         xmlns="http://www.w3.org/2000/svg"
                                     >
                                         <path
                                             d="m4.4 4.55.07-.08a.75.75 0 0 1 .98-.07l.08.07L12 10.94l6.47-6.47a.75.75 0 1 1 1.06 1.06L13.06 12l6.47 6.47c.27.27.3.68.07.98l-.07.08a.75.75 0 0 1-.98.07l-.08-.07L12 13.06l-6.47 6.47a.75.75 0 0 1-1.06-1.06L10.94 12 4.47 5.53a.75.75 0 0 1-.07-.98l.07-.08-.07.08Z"
                                             fill="currentColor"
-                                        ></path>
+                                        />
                                     </svg>
                                 </span>
                             </button>
@@ -95,7 +203,10 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                     >
                         <div className="so.flex so.w-full" role="presentation">
                             <div className="so.max-w-full so.flex-1 so.flex" role="presentation">
-                                <div role="presentation" className="so.flex so.flex-col so.w-full">
+                                <div
+                                    role="presentation"
+                                    className="so.flex so.flex-col so.w-full so.border so.border-zinc-100 so.border-solid "
+                                >
                                     <div
                                         id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearchContainer"
                                         role="presentation"
@@ -106,74 +217,123 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                                             id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_BasicContainer"
                                             data-id="MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup"
                                             role="presentation"
-                                            className="so.rounded so.w-full so.bg-gray-100 pa-of pa-b pa-y pa-az pa-w pa-og pa-iu pa-gs pa-z pa-oh pa-oi pa-oj pa-ok pa-ol pa-om pa-on pa-oo pa-op pa-oq pa-or pa-os pa-ot pa-ou pa-ov pa-ow pa-ox pa-oy pa-oz pa-pa pa-pb flexbox"
+                                            className="so.rounded so.w-full so.bg-gray-100 "
                                         >
                                             <div
                                                 id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-Lookup_falseBoundLookup_0_live_region"
                                                 role="status"
                                                 aria-atomic="true"
                                             ></div>
-                                            <div
-                                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearch"
-                                                role="presentation"
-                                                className="so.flex so.w-full so.p-1 so.pl-2 so.border-b-2 so.border-b-transparent focus-within:so.border-b-blue-700"
-                                            >
-                                                <input
-                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_textInputBox_with_filter_new"
-                                                    aria-label="Select record, Lookup"
-                                                    role="searchbox"
-                                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_textInputBox_with_filter_new"
-                                                    title="Select to enter data"
-                                                    placeholder={lookForRecords}
-                                                    autoComplete="off"
-                                                    aria-autocomplete="list"
-                                                    onKeyPress={onKeyPress}
-                                                    type="text"
-                                                    className="so.flex-1 so.bg-transparent so.outline-none active:so.border-transparent pa-az pa-cx pa-pd pa-fc pa-da pa-ih pa-pe pa-pf pa-pg pa-ph "
-                                                    aria-describedby="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_Type_To_Search_Text"
-                                                />
-
-                                                <button
-                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_search"
-                                                    aria-label="Search records for Select record, Lookup field"
-                                                    title="Search"
-                                                    data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_search"
-                                                    type="button"
-                                                    className="so.justify-center so.align-middle so.p-1 pa-q pa-ee pa-pi pa-cn pa-lh pa-pj pa-da pa-pk pa-pl pa-pm pa-pn pa-iu pa-gz pa-po pa-pp flexbox"
+                                            {selected === null && (
+                                                <div
+                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_InputSearch"
+                                                    role="presentation"
+                                                    className="so.flex so.w-full so.p-1 so.pl-2 so.border-b-2 so.border-b-transparent focus-within:so.border-b-blue-700"
                                                 >
-                                                    <svg
-                                                        width="14px"
-                                                        height="14px"
-                                                        viewBox="0 -0.5 21 21"
-                                                        version="1.1"
-                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    <input
+                                                        ref={inpuRef}
+                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_textInputBox_with_filter_new"
+                                                        aria-label="Select record, Lookup"
+                                                        role="searchbox"
+                                                        data-id="MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_textInputBox_with_filter_new"
+                                                        title="Select to enter data"
+                                                        placeholder={lookForRecords}
+                                                        autoComplete="off"
+                                                        aria-autocomplete="list"
+                                                        onKeyPress={onKeyPress}
+                                                        type="text"
+                                                        className="so.flex-1 so.bg-transparent so.outline-none active:so.border-transparent"
+                                                        aria-describedby="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_Type_To_Search_Text"
+                                                    />
+
+                                                    <button
+                                                        id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_search"
+                                                        aria-label="Search records for Select record, Lookup field"
+                                                        title="Search"
+                                                        type="button"
+                                                        className="so.justify-center so.align-middle so.p-1 so.text-neutral-700 hover:so.text-blue-700"
+                                                        onClick={OnSearchClick}
                                                     >
-                                                        <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                                                            <g
-                                                                transform="translate(-179.000000, -280.000000)"
-                                                                fill="#000000"
+                                                        <svg
+                                                            className="so.fill-current so.w-4 so.h-4"
+                                                            width="14"
+                                                            height="14"
+                                                            viewBox="0 -0.5 21 21"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path d="m5.94 12.929 1.485 1.414L1.485 20 0 18.586zM13.65 12C10.755 12 8.4 9.757 8.4 7s2.355-5 5.25-5 5.25 2.243 5.25 5-2.355 5-5.25 5m0-12C9.59 0 6.3 3.134 6.3 7s3.29 7 7.35 7S21 10.866 21 7s-3.29-7-7.35-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {selected != null && (
+                                                <div
+                                                    role="presentation"
+                                                    className="so.flex so.w-full so.p-1 so.pl-2 so.border-b-2 so.border-b-transparent focus-within:so.border-b-blue-700"
+                                                >
+                                                    <ul className="so.flex so.flex-1 so.overflow-hidden so.flex-row so.relative so.outline-none">
+                                                        <li className="so.flex so.flex-row so.flex-nowrap so.mx-1 so.h-6 so.rounded so.items-center so.max-w-full so.text-sky-800  so.bg-sky-100 hover hover:so.bg-blue-200">
+                                                            <div className="so.justify-center so.flex  so.text-sm so.items-center so.px-1">
+                                                                <img src="./favicon.ico" className="so.h-5 so.w-5" />
+                                                            </div>
+                                                            <div
+                                                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_selected_tag_text_0"
+                                                                role="presentation"
+                                                                className="so.px-1 so.cursor-pointer so.text-sky-800 underline so.leading-5  block so.truncate "
                                                             >
-                                                                <g transform="translate(56.000000, 160.000000)">
-                                                                    <path d="M128.93985,132.929 L130.42455,134.343 L124.4847,140 L123,138.586 L128.93985,132.929 Z M136.65,132 C133.75515,132 131.4,129.757 131.4,127 C131.4,124.243 133.75515,122 136.65,122 C139.54485,122 141.9,124.243 141.9,127 C141.9,129.757 139.54485,132 136.65,132 L136.65,132 Z M136.65,120 C132.5907,120 129.3,123.134 129.3,127 C129.3,130.866 132.5907,134 136.65,134 C140.7093,134 144,130.866 144,127 C144,123.134 140.7093,120 136.65,120 L136.65,120 Z" />
-                                                                </g>
-                                                            </g>
-                                                        </g>
-                                                    </svg>
-                                                </button>
-                                            </div>
+                                                                {selected?.name}
+                                                            </div>
+                                                            <button
+                                                                id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_selected_tag_delete_0"
+                                                                role="button"
+                                                                type="button"
+                                                                className="so.px-2 so.flex so.text-inherit so.rounded so.bg-transparent so.items-center"
+                                                                onClick={onUnSelect}
+                                                            >
+                                                                <span
+                                                                    id="lookupDialogLookup-MscrmControls.FieldControls.SimpleLookupControl-LookupResultsPopup_falseBoundLookup_0_microsoftIcon_cancelButton_0"
+                                                                    className="so.text-xs "
+                                                                >
+                                                                    <svg
+                                                                        className="so.fill-sky-800 so.w-3 so.h-3"
+                                                                        viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                    >
+                                                                        <path d="m4.4 4.55.07-.08a.75.75 0 0 1 .98-.07l.08.07L12 10.94l6.47-6.47a.75.75 0 1 1 1.06 1.06L13.06 12l6.47 6.47c.27.27.3.68.07.98l-.07.08a.75.75 0 0 1-.98.07l-.08-.07L12 13.06l-6.47 6.47a.75.75 0 0 1-1.06-1.06L10.94 12 4.47 5.53a.75.75 0 0 1-.07-.98l.07-.08-.07.08Z" />
+                                                                    </svg>
+                                                                </span>
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                    <div role="presentation" className="so.w-full so.flex so.flex-1">
-                                        {results.length === 0 && (
-                                            <span className="">Type to search or press Enter to browse</span>
+                                    <div role="presentation" className="so.w-full so.flex so.flex-1 so.flex-col">
+                                        {results === null && (
+                                            <span className="so.p-2 so.text-sm so.leading-8 so.cursor-default so.text-neutral-800">
+                                                Type to search or press Enter to browse
+                                            </span>
                                         )}
-                                        {results.length > 0 && (
+                                        {results?.length === 0 && (
+                                            <span className="so.p-2 so.text-sm so.leading-8 so.cursor-default so.text-neutral-800">
+                                                No records found. Create a new record.
+                                            </span>
+                                        )}
+                                        {results?.length > 0 && entityTypesFilter}
+                                        {results?.length > 0 && (
                                             <ul className="so.flex-1 so.flex-col so.scroll-auto">
                                                 {results.map((r) => (
-                                                    <li key={r.id} className="so.flex">
-                                                        <div className="">Icon</div>
-                                                        <div className="so.flex-1">{r.name}</div>
-                                                    </li>
+                                                    <button
+                                                        onClick={() => onSelect(r)}
+                                                        key={r.id}
+                                                        className="so.flex so.gap-x-1 so.min-h-12 so.items-center so.overflow-hidden so.rounded hover:so.bg-gray-200"
+                                                    >
+                                                        <div className="so.justify-center so.flex  so.text-sm so.items-center so.px-1">
+                                                            <img src="./favicon.ico" className="so.h-6 so.w-6"></img>
+                                                        </div>
+                                                        <div className="so.flex-1 so.truncate">{r.name}</div>
+                                                    </button>
                                                 ))}
                                             </ul>
                                         )}
@@ -188,6 +348,7 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                                 className="so.text-sm so.text-white so.border-transparent so.bg-sky-700 so.rounded so.px-3 so.py-1 so.items-center so.box-border so.inline-flex so.justify-center so.no-underline so.align-middle so.overflow-hidden so.min-w-24 so.duration-100 so.transition-[background,border,color] so.ease-in"
                                 type="button"
                                 title="Add"
+                                onClick={() => OnDeleteRecord(selected.id)}
                             >
                                 Add
                             </button>
