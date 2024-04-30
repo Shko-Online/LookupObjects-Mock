@@ -1,6 +1,6 @@
 {
   "name": "@shko.online/lookupobjects-mock",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Mocking Dataverse Lookup Objects to simplify writing soties for PCF components",
   "exports": {
     ".": {
