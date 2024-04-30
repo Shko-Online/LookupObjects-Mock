@@ -43,6 +43,7 @@
             2,
             "smart"
         ],
+        "react/jsx-sort-props": "warn",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
         "prettier/prettier": "error",
@@ -63,6 +64,6 @@
         "semi": [
             "error",
             "always"
-        ]
+        ]        
     }
 }

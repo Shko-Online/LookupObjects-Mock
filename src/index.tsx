@@ -10,7 +10,7 @@ const mockLookupObjects = <
     mockGenerator: MockGenerator<TInputs, TOutputs>,
 ) => {
     let container = document.getElementById('so.lookupObjects');
-    if(container===null){
+    if (container === null) {
         const root = document.getElementById('storybook-root');
         container = document.createElement('div');
         container.style.position = 'absolute';
@@ -22,7 +22,15 @@ const mockLookupObjects = <
                 ReactDOM.unmountComponentAtNode(container);
             };
 
-            ReactDOM.render(<LookupComponent unmount={unmount} resolve={resolve} lookupOptions={lookupOptions} db={mockGenerator.metadata} />, container);        
+            ReactDOM.render(
+                <LookupComponent
+                    db={mockGenerator.metadata}
+                    lookupOptions={lookupOptions}
+                    resolve={resolve}
+                    unmount={unmount}
+                />,
+                container,
+            );
         });
     });
 };
