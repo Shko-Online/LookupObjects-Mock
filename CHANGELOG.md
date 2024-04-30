@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.1.0...v0.2.0) (2024-04-30)
+
+
+### Features
+
+* first release with css included ([42736cd](https://github.com/Shko-Online/LookupObjects-Mock/commit/42736cd1f0ad8dde033d22be7abf42b327514721))
+
 # 0.1.0 (2024-04-30)
 
 
