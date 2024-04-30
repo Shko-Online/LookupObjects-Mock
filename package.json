@@ -46,7 +46,6 @@
   },
   "homepage": "https://github.com/Shko-Online/LookupObjects-Mock#readme",
   "dependencies": {
-    "@shko.online/componentframework-mock": "^0.6.1",
     "react": "16.8.6",
     "react-dom": "16.8.6"
   },
@@ -70,6 +69,7 @@
     "@semantic-release/npm": "^12.0.0",
     "@semantic-release/release-notes-generator": "^13.0.0",
     "@shko.online/build-npm-package": "^0.2.0",
+    "@shko.online/componentframework-mock": "^0.6.2",
     "@storybook/addon-essentials": "^8.0.9",
     "@storybook/addon-interactions": "^8.0.9",
     "@storybook/addon-links": "^8.0.9",

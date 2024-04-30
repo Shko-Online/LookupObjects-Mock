@@ -2,6 +2,9 @@
 import React, { KeyboardEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { MetadataDB } from '@shko.online/componentframework-mock';
 import './LookupCss.css';
+import SingleEntityFilter from './SingleEntityFilter';
+import MultiEntityFilter from './MultiEntityFilter';
+import Header from './Header';
 
 interface ILookupComponentProps {
     unmount: () => void;
@@ -13,7 +16,6 @@ interface ILookupComponentProps {
 function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupComponentProps) {
     const [results, setResults] = useState<ComponentFramework.LookupValue[]>(null);
     const [selected, setSelected] = useState<ComponentFramework.LookupValue>(null);
-
     const inpuRef = useRef<HTMLInputElement>();
     const onCloseClick = useCallback(() => {
         console.log('unmount?');
@@ -22,22 +24,58 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
     }, [resolve, unmount]);
 
     const searchRecords = useCallback(
-        (search: string) => {
-            const metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
-            const select = `SELECT 
-        ${metadata.PrimaryIdAttribute}, 
-        ${metadata.PrimaryNameAttribute}
-    FROM ${metadata.LogicalName}
-    ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
+        (search?: string) => {
+            const result: ComponentFramework.LookupValue[] = [];
+            lookupOptions.entityTypes.forEach((value) => {
+                const metadata = db.getTableMetadata(value);
 
-            const result = (db.db.exec(select) as unknown[]).map(
-                (v) =>
-                    ({
-                        entityType: lookupOptions.entityTypes[0],
-                        id: v[metadata.PrimaryIdAttribute],
-                        name: v[metadata.PrimaryNameAttribute],
-                    }) as ComponentFramework.LookupValue,
-            );
+                const select = `SELECT ${metadata.PrimaryIdAttribute}, ${metadata.PrimaryNameAttribute}
+                                FROM ${metadata.LogicalName}
+                                ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
+
+                const res = (db.db.exec(select) as unknown[]).map(
+                    (v) =>
+                        ({
+                            entityType: value,
+                            id: v[metadata.PrimaryIdAttribute],
+                            name: v[metadata.PrimaryNameAttribute],
+                        }) as ComponentFramework.LookupValue,
+                );
+                result.push(...res);
+            });
+
+            console.log('Result', result);
+            setResults(result);
+        },
+        [db, lookupOptions.entityTypes],
+    );
+
+    const searchByEntityRecords = useCallback(
+        (entity?: string) => {
+            const search = inpuRef?.current?.value;
+            const result: ComponentFramework.LookupValue[] = [];
+            console.log(entity);
+            lookupOptions.entityTypes.forEach((value) => {
+                if (entity && value !== entity) {
+                    return;
+                }
+                const metadata = db.getTableMetadata(value);
+
+                const select = `SELECT ${metadata.PrimaryIdAttribute}, ${metadata.PrimaryNameAttribute}
+                                FROM ${metadata.LogicalName}
+                                ${search ? `WHERE ${metadata.PrimaryNameAttribute || 'name'} LIKE '%${search}%'` : ''}`;
+
+                const res = (db.db.exec(select) as unknown[]).map(
+                    (v) =>
+                        ({
+                            entityType: value,
+                            id: v[metadata.PrimaryIdAttribute],
+                            name: v[metadata.PrimaryNameAttribute],
+                        }) as ComponentFramework.LookupValue,
+                );
+                result.push(...res);
+            });
+
             console.log('Result', result);
             setResults(result);
         },
@@ -73,95 +111,35 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
         onUnSelect();
         unmount();
     }, [onUnSelect, resolve, selected, unmount]);
+
     const lookForRecords = useMemo(() => {
         if (lookupOptions.entityTypes.length > 1) {
             return 'Look for records';
         }
         const metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
-        return 'Look for ' + (metadata.DisplayCollectionName || metadata.DisplayName || metadata.LogicalName);
+        return 'Look for ' + (metadata?.DisplayCollectionName || metadata?.DisplayName || metadata?.LogicalName);
     }, [db, lookupOptions.entityTypes]);
 
     const entityTypesFilter = useMemo(() => {
         const metadata = db.getTableMetadata(lookupOptions.entityTypes[0]);
         // return 'Look for ' + (metadata.DisplayCollectionName || metadata.DisplayName || metadata.LogicalName);
-        console.log(metadata);
         return lookupOptions.entityTypes.length === 1 ? (
-            <div
-                className="so.m-1 so.rounded so.bg-zinc-50 flex so.justify-start so.items-center so.align-middle"
-                role="presentation"
-            >
-                <div
-                    className="so.h-8 so.flex so.items-center so.pl-2 so.text-sm so.text-center so.text-neutral-800 so.cursor-pointer"
-                    role="presentation"
-                >
-                    {metadata.DisplayName || metadata.LogicalName}
-                </div>
-            </div>
+            <SingleEntityFilter entity={metadata?.DisplayName || metadata?.LogicalName} />
         ) : (
-            <div className="so.m-1 so.rounded so.bg-zinc-50" role="presentation">
-                <div className="so.flex so.flex-row so.items-center" role="presentation">
-                    <div
-                        className="so.pl-2 so.text-sm so.text-center so.text-neutral-800 so.cursor-default"
-                        role="presentation"
-                    >
-                        {`Results from: `}
-                    </div>
-                    <ul className="so.flex so.flex-wrap so.overflow-hidden">
-                        {lookupOptions.entityTypes.map((value) => {
-                            const metadata = db.getTableMetadata(value);
-                            return (
-                                <li key={value}>
-                                    <button
-                                        className="so.flex so.text-xs so.py-1 so.px-2 so.m-1 so.leading-4 so.border so.border-neutral-300 disabled:so.border-opacity-30 so.border-solid so.rounded so.bg-white disabled:so.bg-zinc-100 disabled:so.bg-opacity-30 so.text-neutral-800 disabled:so.text-stone-950 disabled:so.text-opacity-50 so.cursor-pointer"
-                                        disabled={results.filter((i) => i.entityType === value).length === 0}
-                                        role="button"
-                                        type="button"
-                                    >
-                                        <span>{metadata.DisplayName || metadata.LogicalName}</span>
-                                    </button>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            </div>
+            <MultiEntityFilter
+                db={db}
+                entityTypes={lookupOptions.entityTypes}
+                results={results}
+                searchByEntityRecords={searchByEntityRecords}
+            />
         );
-    }, [db, lookupOptions.entityTypes, results]);
+    }, [db, lookupOptions.entityTypes, results, searchByEntityRecords]);
 
     return (
         <div className="so.fixed so.top-0 so.bottom-0 so.right-0 so.left-0 so.z-50 so.w-full so.bg-opacity-30 so.bg-black so.flex so.justify-end">
             <div className="so.flex so.flex-col so.h-full so.box-border so.bg-white so.border-solid so.border-2 so.border-transparent so.overflow-auto so.flex-nowrap so.w-[400px] so.content-start so.outline-none so.text-neutral-800 so.font-sans so.font-normal so.antialiased so.visible">
                 <section className="so.flex so.flex-col so.flex-1">
-                    <div className="so.flex so.flex-col so.mb-1 so.mx-5 so.mt-5">
-                        <div className="so.flex so.flex-row so.justify-between" role="presentation">
-                            <h1 className="so.text-xl so.font-semibold so.text-left" tabIndex={-1}>
-                                Lookup Records
-                            </h1>
-                            <button
-                                className="so.bg-transparent so.text-neutral-700 so.rounded so.border-transparent so.items-center so.align-middle so.justify-center so.box-border so.p-1 so.w-7 so.h-7 hover:so.bg-neutral-100 hover:so.text-blue-700"
-                                onClick={onCloseClick}
-                                title="Close"
-                                type="button"
-                            >
-                                <span className="so.items-center so.inline-flex so.justify-center so.leading-5 so.text-xl so.h-5 so.w-5">
-                                    <svg
-                                        aria-hidden="true"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="m4.4 4.55.07-.08a.75.75 0 0 1 .98-.07l.08.07L12 10.94l6.47-6.47a.75.75 0 1 1 1.06 1.06L13.06 12l6.47 6.47c.27.27.3.68.07.98l-.07.08a.75.75 0 0 1-.98.07l-.08-.07L12 13.06l-6.47 6.47a.75.75 0 0 1-1.06-1.06L10.94 12 4.47 5.53a.75.75 0 0 1-.07-.98l.07-.08-.07.08Z"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-                        <h2 className="so.text-base so.font-semibold so.font-sans" tabIndex={-1}>
-                            Select record
-                        </h2>
-                    </div>
+                    <Header onCloseClick={onCloseClick} />
                     <div
                         className="so.flex so.overflow-visible so.mb-6 so.mx-2 so.mt-4 so.justify-between so.h-full so.flex-col"
                         role="presentation"
@@ -264,16 +242,23 @@ function LookupComponent({ unmount, resolve, lookupOptions, db }: ILookupCompone
                                         {results?.length > 0 && (
                                             <ul className="so.flex-1 so.flex-col so.scroll-auto">
                                                 {results.map((r) => (
-                                                    <button
-                                                        className="so.flex so.gap-x-1 so.min-h-12 so.items-center so.overflow-hidden so.rounded hover:so.bg-gray-200"
-                                                        key={r.id}
-                                                        onClick={() => onSelect(r)}
-                                                    >
-                                                        <div className="so.justify-center so.flex so.text-sm so.items-center so.px-1">
-                                                            <img className="so.h-6 so.w-6" src="./favicon.ico"></img>
-                                                        </div>
-                                                        <div className="so.flex-1 so.truncate">{r.name}</div>
-                                                    </button>
+                                                    <li className="so.flex" key={r.id}>
+                                                        <button
+                                                            className="so.flex so.flex-1  so.gap-x-1 so.min-h-12 so.items-center so.overflow-hidden so.rounded hover:so.bg-gray-200"
+                                                            key={r.id}
+                                                            onClick={() => onSelect(r)}
+                                                        >
+                                                            <div className="so.justify-start so.flex so.text-sm so.items-center so.px-1">
+                                                                <img
+                                                                    className="so.h-6 so.w-6"
+                                                                    src="./favicon.ico"
+                                                                ></img>
+                                                            </div>
+                                                            <div className="so.flex-1 so.truncate so.text-start">
+                                                                {r.name}
+                                                            </div>
+                                                        </button>
+                                                    </li>
                                                 ))}
                                             </ul>
                                         )}
