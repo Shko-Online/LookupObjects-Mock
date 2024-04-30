@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.2.0...v0.3.0) (2024-04-30)
+
+
+### Features
+
+* implemented multi entity lookup ([8db17db](https://github.com/Shko-Online/LookupObjects-Mock/commit/8db17db9c59d1247b51a81fa48352bf28945d1a6))
+
 # [0.2.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.1.0...v0.2.0) (2024-04-30)
 
 
