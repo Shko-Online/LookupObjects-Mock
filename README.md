@@ -8,50 +8,24 @@ Mocking PCF [`lookupObjects`](https://learn.microsoft.com/en-us/power-apps/devel
 
 ![LookupScreenshot](https://github.com/Shko-Online/LookupObjects-Mock/assets/107688754/1e47b1e4-021c-430f-aa29-6a992748f396)
 
-## Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/Shko-Online/LookupObjects-Mock
-```
-
-Go to the project directory
-
-```bash
-  cd LookupObjects-Mock
-```
-
-Install dependencies
-
-```bash
-  npm install
-```
-
-Start the server
-
-```bash
-  npm run storybook
-```
-
-
-## Build
-
-To deploy this project run
-
-```bash
-  npm run build
-```
-
-
 ## Usage
+First you should install `@shko.online/lookupobjects-mock` in your project:
+
+```cmd
+npm i -D @shko.online/lookupobjects-mock
+```
+
+then in your story you add the following call:
 
 ```javascript
+import mockLookupObjects from '@shko.online/lookupobjects-mock'
+// ...
+
 //before executing Init exectute mockLookupObjects()
-...
+// ...
     mockLookupObjects(mockGenerator);
     mockGenerator.ExecuteInit();
-...
+// ...
 ```
 
 
