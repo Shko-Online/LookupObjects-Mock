@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/html';
-import type { IInputs, IOutputs } from '../__sample-components__/MultiTableControl/generated/ManifestTypes';
+import type { IInputs, IOutputs } from '../__sample-components__/MultiSelectControl/generated/ManifestTypes';
 
 import { useArgs, useEffect } from '@storybook/preview-api';
-import { MultiTableControl as Component } from '../__sample-components__/MultiTableControl';
+import { MultiSelectControl as Component } from '../__sample-components__/MultiSelectControl';
 import {
     AttributeType,
     ComponentFrameworkMockGenerator,
     ShkoOnline,
     StringPropertyMock,
 } from '@shko.online/componentframework-mock';
-import '../__sample-components__/MultiTableControl/css/MultiTableControl.css';
+import '../__sample-components__/MultiSelectControl/css/MultiSelectControl.css';
 import mockLookupObjects from '../src';
 
 export default {
-    title: "Shko Online's LookupObjects-Mock/MultiTable Control",
+    title: "Shko Online's LookupObjects-Mock/MultiSelect Control",
 } as Meta<StoryArgs>;
 
 interface StoryArgs {
@@ -117,6 +117,10 @@ const renderGenerator = () => {
                         name: 'Contact 1',
                         rev: 1200,
                     },
+                    {
+                        name: 'Contact 2',
+                        rev: 1200,
+                    },
                 ],
             });
 
@@ -133,13 +137,16 @@ const renderGenerator = () => {
                         const rows = mockGenerator.metadata.GetAllRows(
                             lookupOptions.entityTypes ? lookupOptions.entityTypes[0] : 'account',
                         );
-                        resolve([
-                            {
-                                entityType: lookupOptions.entityTypes ? lookupOptions.entityTypes[0] : 'account',
-                                id: rows.rows[0].accountid || '00000000-0000-0000-0000-000000000004',
-                                name: rows.rows[0].name || 'Account',
-                            },
-                        ]);
+
+                        resolve(
+                            rows.rows.map((i) => {
+                                return {
+                                    entityType: i.entityType || 'account',
+                                    id: i.accountid || '00000000-0000-0000-0000-000000000004',
+                                    name: i.name || 'Account',
+                                };
+                            }),
+                        );
                     });
                 },
             );
@@ -158,7 +165,7 @@ const renderGenerator = () => {
     };
 };
 
-export const MultiTableControl = {
+export const MultiSelectControl = {
     render: renderGenerator(),
     args: {},
 } as StoryObj<StoryArgs>;
