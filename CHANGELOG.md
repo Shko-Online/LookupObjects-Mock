@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.3.0...v0.4.0) (2024-05-02)
+
+
+### Features
+
+* implemented multiSelect lookup ([de75d25](https://github.com/Shko-Online/LookupObjects-Mock/commit/de75d2526f03140f50b69ec356e19f73a21a3abf))
+
 # [0.3.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.2.0...v0.3.0) (2024-04-30)
 
 
