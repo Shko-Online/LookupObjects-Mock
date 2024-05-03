@@ -133,3 +133,4 @@ dist
 
 lib/
 src/LookupCss.css
+storybook-static/
