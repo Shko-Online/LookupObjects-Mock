@@ -3,7 +3,7 @@
     This file is part of the 'react-snap-carousel' https://github.com/richardscarrott/react-snap-carousel 
 */
 import React, { MutableRefObject, useImperativeHandle } from 'react';
-import { useSnapCarousel } from '../src/use-snap-carousel';
+import { useSnapCarousel } from './use-snap-carousel';
 
 export interface CarouselProps<T> {
     readonly axis?: 'x' | 'y';
