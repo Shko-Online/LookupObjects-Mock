@@ -77,7 +77,7 @@ export class MultiSelectControl implements ComponentFramework.StandardControl<II
     ): HTMLButtonElement {
         const button: HTMLButtonElement = document.createElement('button');
         button.innerHTML = buttonLabel;
-        entityName && button.setAttribute('entityName', entityName.join(', '));
+        if (entityName) button.setAttribute('entityName', entityName.join(', '));
 
         button.classList.add('SampleControlHtmlTable_ButtonClass');
         button.addEventListener('click', onClickHandler);

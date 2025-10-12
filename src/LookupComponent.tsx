@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-nested-template-literals */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { MetadataDB } from '@shko.online/componentframework-mock';
 import './LookupCss.css';

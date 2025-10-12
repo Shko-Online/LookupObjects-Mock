@@ -6,5 +6,4 @@ export default create({
     brandUrl: 'https://github.com/shko-online/ComponentFramework-Mock',
     brandImage: './Shko Online 92x32.svg',
     brandTarget: '_self',
-    
 });

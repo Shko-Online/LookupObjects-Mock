@@ -44,7 +44,6 @@ const renderGenerator = () => {
                 },
                 container,
             );
-            // mockGenerator.SetControlResource(resource);
 
             mockGenerator.metadata.initMetadata([
                 {
@@ -146,7 +145,6 @@ const renderGenerator = () => {
             mockLookupObjects(mockGenerator);
             mockGenerator.ExecuteInit();
         }
-
         if (mockGenerator) {
             mockGenerator.context.mode.isVisible = args.isVisible;
             mockGenerator.context.mode.isControlDisabled = args.isDisabled;

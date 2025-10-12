@@ -44,7 +44,6 @@ const renderGenerator = () => {
                 },
                 container,
             );
-            // mockGenerator.SetControlResource(resource);
 
             mockGenerator.metadata.initMetadata([
                 {
@@ -133,21 +132,17 @@ const renderGenerator = () => {
             mockGenerator.context.mode.isVisible = args.isVisible;
             mockGenerator.context.utils.lookupObjects.callsFake(
                 (lookupOptions: ComponentFramework.UtilityApi.LookupOptions) => {
-                    return new Promise<ComponentFramework.LookupValue[]>((resolve) => {
-                        const rows = mockGenerator.metadata.GetAllRows(
-                            lookupOptions.entityTypes ? lookupOptions.entityTypes[0] : 'account',
-                        );
-
-                        resolve(
-                            rows.rows.map((i) => {
-                                return {
-                                    entityType: i.entityType || 'account',
-                                    id: i.accountid || '00000000-0000-0000-0000-000000000004',
-                                    name: i.name || 'Account',
-                                };
-                            }),
-                        );
+                    const rows = mockGenerator.metadata.GetAllRows(
+                        lookupOptions.entityTypes ? lookupOptions.entityTypes[0] : 'account',
+                    );
+                    const mappedRows = rows.rows.map((i) => {
+                        return {
+                            entityType: i.entityType || 'account',
+                            id: i.accountid || '00000000-0000-0000-0000-000000000004',
+                            name: i.name || 'Account',
+                        };
                     });
+                    return Promise.resolve(mappedRows);
                 },
             );
             mockLookupObjects(mockGenerator);
