@@ -89,6 +89,7 @@
     "@storybook/preview-api": "8.6.14",
     "@storybook/test": "8.6.14",
     "@storybook/theming": "8.6.14",
+    "@types/node": "^20.19.21",
     "@types/powerapps-component-framework": "^1.3.18",
     "@types/react": "16.8.25",
     "@types/react-dom": "16.8.5",
