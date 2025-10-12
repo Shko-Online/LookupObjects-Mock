@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.4.0...v0.4.1) (2025-10-12)
+
+
+### Bug Fixes
+
+* fix import path ([64d6a87](https://github.com/Shko-Online/LookupObjects-Mock/commit/64d6a87ea4d07580884a0d6f9bb7303b87bdf618))
+* major refactor to fix lint and build ([e112131](https://github.com/Shko-Online/LookupObjects-Mock/commit/e11213164a62bc5e8122d32e38586350469454a2))
+* updated @types/node to v20 ([f870220](https://github.com/Shko-Online/LookupObjects-Mock/commit/f870220044d9281fe74ae1594dd40f05af056b93))
+
 # [0.4.0](https://github.com/Shko-Online/LookupObjects-Mock/compare/v0.3.0...v0.4.0) (2024-05-02)
 
 
